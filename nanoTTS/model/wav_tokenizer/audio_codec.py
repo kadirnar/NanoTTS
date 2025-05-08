@@ -85,9 +85,3 @@ class AudioCodec:
     def save_audio(self, audio: torch.Tensor, path: str):
         torchaudio.save(path, audio.cpu(), sample_rate=self.sr, encoding='PCM_S', bits_per_sample=16)
 
-
-
-
-    
-
-       
