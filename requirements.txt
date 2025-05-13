@@ -1,6 +1,5 @@
 torch
 torchaudio
-# outetts
 bitsandbytes
 transformers
 datasets
