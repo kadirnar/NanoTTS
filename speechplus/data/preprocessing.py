@@ -1,14 +1,16 @@
-import argparse
+import json
 import os
+from pathlib import Path
 
 import numpy as np
 import torch
 from datasets import load_dataset
 from huggingface_hub import HfApi
-from outetts.wav_tokenizer.decoder import WavTokenizer
-from outetts.wav_tokenizer.encoder.utils import convert_audio
 from tqdm import tqdm
 from transformers import AutoTokenizer
+
+from speechplus.model.wav_tokenizer.decoder import WavTokenizer
+from speechplus.model.wav_tokenizer.encoder.utils import convert_audio
 
 
 def preprocess_dataset(
@@ -23,6 +25,7 @@ def preprocess_dataset(
     max_length: int = 2048,
     debug: bool = False,
     subset_ratio: float = 1.0,
+    hf_username: str = "",
 ):
     print("Loading dataset...")
     dataset = load_dataset(dataset_name, dataset_subset, trust_remote_code=True)
@@ -53,7 +56,9 @@ def preprocess_dataset(
 
     # Create datasets- hub
     api = HfApi()
-    # api.create_repo(f"Steveeeeeeen/{output_dir}", repo_type="dataset")
+    if not hf_username:
+        raise ValueError("Please set your HuggingFace username in the data_config.json file")
+    api.create_repo(f"{hf_username}/{output_dir}", repo_type="dataset")
 
     for split in splits:
         split_data = dataset[split]
@@ -108,13 +113,13 @@ def preprocess_dataset(
             np.save(shape_path, np.array([len(all_sequences), max_length]))
 
         api.upload_file(
-            repo_id=f"Steveeeeeeen/{output_dir}",
+            repo_id=f"{hf_username}/{output_dir}",
             path_in_repo=f"{split}_input_ids.memmap",
             path_or_fileobj=memmap_path,
             repo_type="dataset",
         )
         api.upload_file(
-            repo_id=f"Steveeeeeeen/{output_dir}",
+            repo_id=f"{hf_username}/{output_dir}",
             path_in_repo=f"{split}_input_ids_shape.npy",
             path_or_fileobj=shape_path,
             repo_type="dataset",
@@ -124,38 +129,21 @@ def preprocess_dataset(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process audio dataset using WavTokenizer")
-
-    parser.add_argument("--dataset_name", type=str, default="parler-tts/mls_eng_10k")
-    parser.add_argument("--dataset_subset", type=str)
-    parser.add_argument("--output_dir", type=str, default="mls_eng_10k")
-    parser.add_argument("--tokenizer_name", type=str, default="HuggingFaceTB/SmolLM2-360M-Instruct")
-    parser.add_argument(
-        "--wav_tokenizer_model_path",
-        type=str,
-        default="wavtokenizer_large_speech_320_v2.ckpt",
-    )
-    parser.add_argument(
-        "--wav_tokenizer_config_path",
-        type=str,
-        default="wavtokenizer_mediumdata_frame75_3s_nq1_code4096_dim512_kmeans200_attn.yaml",
-    )
-    parser.add_argument("--sample_rate", type=int, default=24000)
-    parser.add_argument("--max_length", type=int, default=2048)
-    parser.add_argument("--debug", action="store_true")
-    parser.add_argument("--subset_ratio", type=float, default=1.0)
-
-    args = parser.parse_args()
+    # Load configuration from data_config.json
+    config_path = Path(__file__).parent.parent / "config" / "data_config.json"
+    with open(config_path) as f:
+        config = json.load(f)
 
     preprocess_dataset(
-        dataset_name=args.dataset_name,
-        dataset_subset=args.dataset_subset,
-        output_dir=args.output_dir,
-        tokenizer_name=args.tokenizer_name,
-        wav_tokenizer_model_path=args.wav_tokenizer_model_path,
-        wav_tokenizer_config_path=args.wav_tokenizer_config_path,
-        sample_rate=args.sample_rate,
-        max_length=args.max_length,
-        debug=args.debug,
-        subset_ratio=args.subset_ratio,
+        dataset_name=config["dataset_name"],
+        dataset_subset=config["dataset_subset"],
+        output_dir=config["output_dir"],
+        tokenizer_name=config["tokenizer_name"],
+        wav_tokenizer_model_path=config["wav_tokenizer_model_path"],
+        wav_tokenizer_config_path=config["wav_tokenizer_config_path"],
+        sample_rate=config["sample_rate"],
+        max_length=config["max_length"],
+        debug=config["debug"],
+        subset_ratio=config["subset_ratio"],
+        hf_username=config["hf_username"],
     )
