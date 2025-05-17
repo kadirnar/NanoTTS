@@ -1,0 +1,13 @@
+{
+  "dataset_name": "parler-tts/mls_eng_10k",
+  "dataset_subset": null,
+  "output_dir": "mls_eng_10k",
+  "tokenizer_name": "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "wav_tokenizer_model_path": "wavtokenizer_large_speech_320_v2.ckpt",
+  "wav_tokenizer_config_path": "wavtokenizer_mediumdata_frame75_3s_nq1_code4096_dim512_kmeans200_attn.yaml",
+  "sample_rate": 24000,
+  "max_length": 2048,
+  "debug": false,
+  "subset_ratio": 1.0,
+  "hf_username": "kadirnar"
+}
