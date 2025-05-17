@@ -1,7 +1,7 @@
 {
     "llm_model_name_or_path": "HuggingFaceTB/SmolLM2-360M-Instruct",
     "cache_dir": null,
-    "data_path": "libritts_r",
+    "data_path": "mls_eng_10k",
     "optim": "adamw_torch_fused",
     "model_max_length": 2048,
     "logging_steps": 10,
