@@ -9,7 +9,7 @@ import wandb
 from huggingface_hub import hf_hub_download
 from liger_kernel.transformers import AutoLigerKernelForCausalLM
 from tqdm import tqdm
-from transformers import AutoTokenizer, Trainer, default_data_collator
+from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, default_data_collator
 
 from speechplus.data.dataset_speech import CustomTrainingArguments, DataArguments, ModelArguments, TTSDataset
 
@@ -62,7 +62,8 @@ def main():
     # This step will automatically download the dataset if it doesn't exist
     download_dataset(repo_id="Steveeeeeeen/mls_eng_10k", local_dir=data_args.data_path)
 
-    if training_args.report_to == "wandb":
+    if (training_args.local_rank == 0 or
+            training_args.local_rank == -1) and training_args.report_to == "wandb":
         wandb.init(
             project="tts-training",
             name=training_args.run_name,
@@ -118,10 +119,8 @@ def main():
         train_dataset = TTSDataset(data_args.data_path, "train", tokenizer)
         eval_dataset = TTSDataset(data_args.data_path, "test", tokenizer)
 
-    optimizer = bnb.optim.Adam8bit(model.parameters(), lr=training_args.learning_rate)
-
     if training_args.deepspeed is None:
-        training_args.deepspeed = "ds_config.json"
+        training_args.deepspeed = "speechplus/config/ds_config.json"
 
     trainer = Trainer(
         model=model,
@@ -130,7 +129,6 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=default_data_collator,
-        optimizers=(optimizer, None),
     )
 
     trainer.train()

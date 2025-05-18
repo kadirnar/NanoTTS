@@ -6,4 +6,5 @@ datasets
 tqdm
 wandb
 liger_kernel
-accelerate>=0.26.0
+accelerate
+huggingface_hub[hf_xet]
