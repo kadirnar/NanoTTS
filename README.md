@@ -1,11 +1,11 @@
-# SpeechPlus
-
 <div align="center">
 <h2>
-    SpeechPlus: Faster, Smarter, and More Capable 🚀
+    SpeechPlus: Small LLM-Based Text-to-Speech Library 🚀
 </h2>
 <img width="500" alt="teaser" src="assets/logo.png">
 </div>
+
+SpeechPlus is a high-quality text-to-speech (TTS) library that supports multiple small language models and audio codecs. It creates natural-sounding speech by combining efficient language understanding with superior audio generation technology.
 
 ## 🛠️ Installation
 
