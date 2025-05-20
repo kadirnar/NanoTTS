@@ -1,5 +1,3 @@
-import argparse
-
 import numpy as np
 import torch
 import torchaudio
@@ -161,66 +159,33 @@ def generate_speech_from_text(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SmolVoice inference script")
+    # Manually set values instead of using argparse
+    model_path = "output/checkpoint-1000"
+    tokenizer_path = "output/checkpoint-1000"
+    wav_tokenizer_model_path = "wavtokenizer_large_speech_320_v2.ckpt"
+    wav_tokenizer_config_path = "wavtokenizer_mediumdata_frame75_3s_nq1_code4096_dim512_kmeans200_attn.yaml"
+    sample_rate = 24000
+    max_length = 2048
 
-    # Common parameters
-    parser.add_argument(
-        "--model_path",
-        type=str,
-        help="Path to the fine-tuned model",
-        default="output/checkpoint-1000",
-    )
-    parser.add_argument(
-        "--tokenizer_path",
-        type=str,
-        help="Path to the tokenizer (defaults to model_path)",
-        default="output/checkpoint-1000",
-    )
-    parser.add_argument(
-        "--wav_tokenizer_model",
-        type=str,
-        default="wavtokenizer_large_speech_320_v2.ckpt",
-        help="Path to the WavTokenizer model checkpoint",
-    )
-    parser.add_argument(
-        "--wav_tokenizer_config",
-        type=str,
-        default="wavtokenizer_mediumdata_frame75_3s_nq1_code4096_dim512_kmeans200_attn.yaml",
-        help="Path to the WavTokenizer config file",
-    )
-    parser.add_argument("--sample_rate", type=int, default=24000, help="Audio sample rate")
-    parser.add_argument("--max_length", type=int, default=2048, help="Maximum sequence length")
+    # Set task parameters
+    task = "synthesize"  # Options: "synthesize" or "transcribe"
 
-    # Task-specific parameters
-    subparsers = parser.add_subparsers(dest="task", help="Task to perform")
+    if task == "synthesize":
+        # Text-to-speech parameters
+        text = "Merhaba, bu bir test konuşmasıdır."  # Replace with your text
+        output_path = "generated_speech.wav"
 
-    # Speech-to-text task
-    stt_parser = subparsers.add_parser("transcribe", help="Transcribe speech to text")
-    stt_parser.add_argument("--audio_path", type=str, required=True, help="Path to input audio file")
-
-    # Text-to-speech task
-    tts_parser = subparsers.add_parser("synthesize", help="Synthesize text to speech")
-    tts_parser.add_argument("--text", type=str, required=True, help="Text to synthesize")
-    tts_parser.add_argument(
-        "--output_path",
-        type=str,
-        default="generated_speech.wav",
-        help="Path to save generated audio",
-    )
-
-    args = parser.parse_args()
-
-    # Execute the appropriate task
-    if args.task == "synthesize":
         generate_speech_from_text(
-            text=args.text,
-            model_path=args.model_path,
-            tokenizer_path=args.tokenizer_path,
-            output_path=args.output_path,
-            wav_tokenizer_model_path=args.wav_tokenizer_model,
-            wav_tokenizer_config_path=args.wav_tokenizer_config,
-            sample_rate=args.sample_rate,
-            max_length=args.max_length,
+            text=text,
+            model_path=model_path,
+            tokenizer_path=tokenizer_path,
+            output_path=output_path,
+            wav_tokenizer_model_path=wav_tokenizer_model_path,
+            wav_tokenizer_config_path=wav_tokenizer_config_path,
+            sample_rate=sample_rate,
+            max_length=max_length,
         )
-    else:
-        parser.print_help()
+    elif task == "transcribe":
+        # Speech-to-text parameters
+        audio_path = "input_audio.wav"  # Replace with your audio file path
+        print(f"Transcription functionality not implemented yet for {audio_path}")
